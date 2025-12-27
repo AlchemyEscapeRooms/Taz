@@ -1,0 +1,30 @@
+{
+  "positions": {
+    "RIVN": {
+      "symbol": "RIVN",
+      "asset_type": "stock",
+      "shares": 1475,
+      "entry_price": 22.4,
+      "entry_time": "2025-12-19T14:29:25.415547",
+      "strategy": "breakout_hunter"
+    },
+    "FCEL": {
+      "symbol": "FCEL",
+      "asset_type": "stock",
+      "shares": 3767,
+      "entry_price": 8.8,
+      "entry_time": "2025-12-19T14:59:36.392784",
+      "strategy": "dip_sniper"
+    }
+  },
+  "stats": {
+    "trades_executed": 6,
+    "winning_trades": 1,
+    "losing_trades": 1,
+    "total_profit": -4160.2154,
+    "biggest_win": 1056.0,
+    "biggest_loss": -5216.2154,
+    "best_streak": 1,
+    "worst_streak": 1
+  }
+}

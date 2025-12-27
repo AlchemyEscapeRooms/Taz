@@ -1,0 +1,14 @@
+trade_id,timestamp,symbol,action,side,quantity,price,total_value,strategy,mode,primary_signal,signal_value,threshold,direction,trend,explanation,realized_pnl
+PP-20251210165459-0001,2025-12-10T16:54:59.161297,AAPL,SELL,long,43.0000,278.86,11991.05,Volume Spike,paper,Volume Spike,,,sell_signal,,SELL: High volume + price rise - LOSS $-6.38,-6.38
+PP-20251211112726-0001,2025-12-11T11:27:26.409776,ARKW,SELL,long,100.0000,156.83,15683.00,Bollinger 30/70,paper,Bollinger 30/70,,,sell_signal,,SELL: Price at upper 30% of bands - LOSS $-467.00,-467.00
+PP-20251211112727-0002,2025-12-11T11:27:27.019450,PATH,SELL,long,100.0000,18.41,1841.00,Momentum Simple,paper,Momentum Simple,,,sell_signal,,SELL: MACD diff < 0 - WIN +$746.21,746.21
+PP-20251215122959-0001,2025-12-15T12:29:59.043432,DIA,SELL,long,25.0000,484.35,12108.75,Momentum Simple,paper,Momentum Simple,,,sell_signal,,SELL: MACD diff < 0 - WIN +$122.50,122.50
+PP-20251215122959-0002,2025-12-15T12:29:59.312087,META,SELL,long,10.0000,650.25,6502.55,Volume Spike,paper,Volume Spike,,,sell_signal,,SELL: High volume + price rise - LOSS $-881.78,-881.78
+PP-20251215123000-0003,2025-12-15T12:30:00.544572,UNH,SELL,long,36.0000,339.64,12227.04,Momentum Simple,paper,Momentum Simple,,,sell_signal,,SELL: MACD diff < 0 - WIN +$554.04,554.04
+PP-20251215130027-0004,2025-12-15T13:00:27.475416,TSLA,SELL,long,99.0000,476.94,47217.28,RSI 30/70,paper,RSI 30/70,,,sell_signal,,SELL: RSI > 70 - WIN +$14023.57,14023.57
+PP-20251215130027-0005,2025-12-15T13:00:27.700085,TSM,SELL,long,25.0000,290.44,7261.00,RSI 45/55,paper,RSI 45/55,,,sell_signal,,SELL: RSI > 55 - WIN +$1266.16,1266.16
+PP-20251215140032-0001,2025-12-15T14:00:32.253721,GE,SELL,long,42.0000,304.53,12790.26,RSI 30/70,paper,RSI 30/70,,,sell_signal,,SELL: PROFIT: +7.1% - WIN +$885.36,885.36
+PP-20251216140011-0001,2025-12-16T14:00:11.924545,ARKQ,SELL,long,100.0000,112.99,11299.00,Volume Spike,paper,Volume Spike,,,sell_signal,,SELL: PROFIT: +11.7% - WIN +$1109.00,1109.00
+PP-20251216140012-0002,2025-12-16T14:00:12.535033,SNOW,SELL,long,10.0000,218.78,2187.80,Bollinger Mean Rev,paper,Bollinger Mean Rev,,,sell_signal,,SELL: PROFIT: +12.3% - WIN +$234.40,234.40
+PP-20251216150034-0003,2025-12-16T15:00:34.216168,ARKQ,BUY,long,108.0000,113.02,12206.16,Volume Spike,paper,Volume Spike,,,buy_signal,,BUY: High volume + price drop,
+PP-20251216150034-0004,2025-12-16T15:00:34.516206,MSFT,SELL,long,24.0000,476.38,11433.12,Mean Rev 2%,paper,Mean Rev 2%,,,sell_signal,,SELL: SIGNAL: -0.9% - LOSS $-65.32,-65.32

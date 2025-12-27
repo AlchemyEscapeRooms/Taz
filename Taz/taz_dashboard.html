@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taz - Tazmanian Devil Trading</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a25;
+            --accent: #ff6b35;
+            --accent-glow: rgba(255, 107, 53, 0.3);
+            --success: #00ff88;
+            --danger: #ff4444;
+            --warning: #ffaa00;
+            --text-primary: #ffffff;
+            --text-secondary: #888899;
+            --border: #2a2a3a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, var(--accent), #ff8855);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .logo .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .status-running {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .status-stopped {
+            background: rgba(255, 68, 68, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .metric-positive { color: var(--success); }
+        .metric-negative { color: var(--danger); }
+        .metric-neutral { color: var(--text-primary); }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #ff8855;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .opportunities-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .opportunities-table th,
+        .opportunities-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .opportunities-table th {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .signal-buy {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--success);
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .signal-watch {
+            background: rgba(255, 170, 0, 0.2);
+            color: var(--warning);
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .score-bar {
+            width: 100px;
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            border-radius: 4px;
+        }
+
+        .positions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .position-item {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .position-symbol {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .position-type {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .position-pnl {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-item {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .log-container {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+        }
+
+        .log-entry {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .log-time {
+            color: var(--text-secondary);
+            margin-right: 1rem;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading {
+            animation: pulse 1.5s infinite;
+        }
+
+        .refresh-indicator {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <h1>TAZ</h1>
+            <div class="subtitle">Tazmanian Devil Trading System</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <span class="refresh-indicator" id="lastUpdate">--</span>
+            <span class="status-badge" id="statusBadge">Loading...</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Control Panel -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="controls">
+                <button class="btn btn-primary" onclick="startTrader()">
+                    <span>Start Taz</span>
+                </button>
+                <button class="btn btn-danger" onclick="stopTrader()">
+                    <span>Stop</span>
+                </button>
+                <button class="btn btn-secondary" onclick="runScan()">
+                    <span>Run Scan</span>
+                </button>
+                <button class="btn btn-secondary" onclick="refreshAll()">
+                    <span>Refresh</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Metrics Row -->
+        <div class="grid">
+            <div class="card">
+                <div class="metric">
+                    <div class="metric-value" id="equity">$0.00</div>
+                    <div class="metric-label">Account Equity</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="metric">
+                    <div class="metric-value metric-neutral" id="totalProfit">$0.00</div>
+                    <div class="metric-label">Total Profit</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="metric">
+                    <div class="metric-value" id="winRate">0%</div>
+                    <div class="metric-label">Win Rate</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="metric">
+                    <div class="metric-value" id="trades">0</div>
+                    <div class="metric-label">Total Trades</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid">
+            <!-- Positions -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Open Positions</span>
+                    <span id="positionCount">0</span>
+                </div>
+                <div class="positions-list" id="positionsList">
+                    <div class="empty-state">No open positions</div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Trading Stats</span>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value metric-positive" id="winningTrades">0</div>
+                        <div class="stat-label">Winning Trades</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value metric-negative" id="losingTrades">0</div>
+                        <div class="stat-label">Losing Trades</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value metric-positive" id="biggestWin">$0</div>
+                        <div class="stat-label">Biggest Win</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value metric-negative" id="biggestLoss">$0</div>
+                        <div class="stat-label">Biggest Loss</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scanner Results -->
+        <div class="card full-width">
+            <div class="card-header">
+                <span class="card-title">Scanner Opportunities</span>
+                <span id="buySignals">0 BUY signals</span>
+            </div>
+            <table class="opportunities-table">
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Type</th>
+                        <th>Score</th>
+                        <th>Price</th>
+                        <th>1h Change</th>
+                        <th>Volatility</th>
+                        <th>Volume</th>
+                        <th>RSI</th>
+                        <th>Signal</th>
+                        <th>Strategy</th>
+                    </tr>
+                </thead>
+                <tbody id="opportunitiesTable">
+                    <tr>
+                        <td colspan="10" class="empty-state">No scan results. Click "Run Scan" to find opportunities.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="card full-width">
+            <div class="card-header">
+                <span class="card-title">Activity Log</span>
+            </div>
+            <div class="log-container" id="logContainer">
+                <div class="log-entry">
+                    <span class="log-time">--:--:--</span>
+                    <span>Dashboard initialized. Waiting for data...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+
+        // State
+        let isRunning = false;
+
+        // Utility functions
+        function formatCurrency(value) {
+            const num = parseFloat(value) || 0;
+            return num >= 0 ? `$${num.toFixed(2)}` : `-$${Math.abs(num).toFixed(2)}`;
+        }
+
+        function formatPercent(value) {
+            const num = parseFloat(value) || 0;
+            return `${num >= 0 ? '+' : ''}${num.toFixed(2)}%`;
+        }
+
+        function addLog(message) {
+            const container = document.getElementById('logContainer');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">${time}</span><span>${message}</span>`;
+            container.insertBefore(entry, container.firstChild);
+
+            // Keep only last 50 entries
+            while (container.children.length > 50) {
+                container.removeChild(container.lastChild);
+            }
+        }
+
+        function updateLastRefresh() {
+            document.getElementById('lastUpdate').textContent =
+                `Last update: ${new Date().toLocaleTimeString()}`;
+        }
+
+        // API functions
+        async function fetchStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/api/taz/status`);
+                if (!response.ok) throw new Error('Status unavailable');
+                const data = await response.json();
+
+                isRunning = data.running;
+                document.getElementById('statusBadge').textContent =
+                    isRunning ? 'RUNNING' : 'STOPPED';
+                document.getElementById('statusBadge').className =
+                    `status-badge ${isRunning ? 'status-running' : 'status-stopped'}`;
+
+                // Update account
+                if (data.account) {
+                    document.getElementById('equity').textContent =
+                        formatCurrency(data.account.equity);
+                }
+
+                // Update positions
+                updatePositions(data.positions || {});
+
+                // Update stats
+                if (data.stats) {
+                    document.getElementById('trades').textContent = data.stats.trades || 0;
+                    document.getElementById('winRate').textContent =
+                        `${(data.stats.win_rate || 0).toFixed(1)}%`;
+
+                    const profit = data.stats.total_profit || 0;
+                    const profitEl = document.getElementById('totalProfit');
+                    profitEl.textContent = formatCurrency(profit);
+                    profitEl.className = `metric-value ${profit >= 0 ? 'metric-positive' : 'metric-negative'}`;
+                }
+
+                updateLastRefresh();
+            } catch (error) {
+                console.error('Status fetch error:', error);
+                document.getElementById('statusBadge').textContent = 'OFFLINE';
+                document.getElementById('statusBadge').className = 'status-badge status-stopped';
+            }
+        }
+
+        async function fetchStats() {
+            try {
+                const response = await fetch(`${API_BASE}/api/taz/stats`);
+                if (!response.ok) return;
+                const data = await response.json();
+
+                document.getElementById('winningTrades').textContent = data.winning_trades || 0;
+                document.getElementById('losingTrades').textContent = data.losing_trades || 0;
+                document.getElementById('biggestWin').textContent = formatCurrency(data.biggest_win);
+                document.getElementById('biggestLoss').textContent = formatCurrency(data.biggest_loss);
+            } catch (error) {
+                console.error('Stats fetch error:', error);
+            }
+        }
+
+        async function fetchScanner() {
+            try {
+                const response = await fetch(`${API_BASE}/api/taz/scanner`);
+                if (!response.ok) return;
+                const data = await response.json();
+
+                const opportunities = data.opportunities || [];
+                const buyCount = opportunities.filter(o => o.signal === 'BUY').length;
+                document.getElementById('buySignals').textContent = `${buyCount} BUY signals`;
+
+                updateOpportunitiesTable(opportunities);
+            } catch (error) {
+                console.error('Scanner fetch error:', error);
+            }
+        }
+
+        function updatePositions(positions) {
+            const container = document.getElementById('positionsList');
+            const entries = Object.entries(positions);
+
+            document.getElementById('positionCount').textContent = entries.length;
+
+            if (entries.length === 0) {
+                container.innerHTML = '<div class="empty-state">No open positions</div>';
+                return;
+            }
+
+            container.innerHTML = entries.map(([symbol, pos]) => {
+                const pnl = pos.unrealized_pnl || 0;
+                const pnlClass = pnl >= 0 ? 'metric-positive' : 'metric-negative';
+                return `
+                    <div class="position-item">
+                        <div>
+                            <div class="position-symbol">${symbol}</div>
+                            <div class="position-type">${pos.pnl_pct?.toFixed(2) || 0}%</div>
+                        </div>
+                        <div class="position-pnl ${pnlClass}">${formatCurrency(pnl)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateOpportunitiesTable(opportunities) {
+            const tbody = document.getElementById('opportunitiesTable');
+
+            if (!opportunities || opportunities.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="empty-state">No opportunities found. Click "Run Scan" to search.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = opportunities.slice(0, 15).map(opp => `
+                <tr>
+                    <td><strong>${opp.symbol}</strong></td>
+                    <td>${opp.asset_type?.toUpperCase()}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>${opp.score?.toFixed(1)}</span>
+                            <div class="score-bar">
+                                <div class="score-fill" style="width: ${opp.score}%"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>$${opp.current_price?.toFixed(4)}</td>
+                    <td class="${opp.price_change_1h >= 0 ? 'metric-positive' : 'metric-negative'}">
+                        ${formatPercent(opp.price_change_1h)}
+                    </td>
+                    <td>${opp.volatility?.toFixed(1)}%</td>
+                    <td>${opp.volume_ratio?.toFixed(1)}x</td>
+                    <td>${opp.rsi?.toFixed(0)}</td>
+                    <td>
+                        <span class="${opp.signal === 'BUY' ? 'signal-buy' : 'signal-watch'}">
+                            ${opp.signal}
+                        </span>
+                    </td>
+                    <td>${opp.strategy}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Control functions
+        async function startTrader() {
+            try {
+                addLog('Starting Taz trader...');
+                const response = await fetch(`${API_BASE}/api/taz/start`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        capital: 1000,
+                        paper: true,
+                        crypto: true,
+                        rl: true
+                    })
+                });
+                const data = await response.json();
+                addLog(`Taz started: ${data.mode} mode, $${data.capital} capital`);
+                await refreshAll();
+            } catch (error) {
+                addLog(`Error starting Taz: ${error.message}`);
+            }
+        }
+
+        async function stopTrader() {
+            try {
+                addLog('Stopping Taz trader...');
+                const response = await fetch(`${API_BASE}/api/taz/stop`, { method: 'POST' });
+                const data = await response.json();
+                addLog(`Taz ${data.status}`);
+                await refreshAll();
+            } catch (error) {
+                addLog(`Error stopping Taz: ${error.message}`);
+            }
+        }
+
+        async function runScan() {
+            try {
+                addLog('Running volatility scan...');
+                const response = await fetch(`${API_BASE}/api/taz/scan`, { method: 'POST' });
+                const data = await response.json();
+                addLog(`Scan complete: ${data.total_opportunities} opportunities, ${data.buy_signals} BUY signals`);
+
+                // Update table with new results
+                if (data.top_5) {
+                    updateOpportunitiesTable(data.top_5);
+                }
+
+                // Fetch full results
+                await fetchScanner();
+            } catch (error) {
+                addLog(`Scan error: ${error.message}`);
+            }
+        }
+
+        async function refreshAll() {
+            await Promise.all([
+                fetchStatus(),
+                fetchStats(),
+                fetchScanner()
+            ]);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            addLog('Taz Dashboard initialized');
+            refreshAll();
+
+            // Auto-refresh every 10 seconds
+            setInterval(refreshAll, 10000);
+        });
+    </script>
+</body>
+</html>

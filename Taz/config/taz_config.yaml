@@ -1,0 +1,243 @@
+# ============================================================
+# TAZ - TAZMANIAN DEVIL AGGRESSIVE TRADING CONFIGURATION
+# ============================================================
+# Purpose: Grow small accounts ($500-$1000) as FAST as possible
+# Risk Level: HIGH - This is for aggressive growth, not safety
+# ============================================================
+
+taz:
+  mode: aggressive_growth
+  description: "Maximum profit velocity - grow small accounts fast"
+
+  # Starting capital range this system is designed for
+  target_capital_range:
+    min: 500
+    max: 5000
+
+  # Trading mode (paper or live)
+  trading_mode: paper
+
+  # Position sizing - AGGRESSIVE
+  position_sizing:
+    # Use up to 40% of portfolio per trade (concentrated bets)
+    max_position_pct: 0.40
+    # Minimum position to bother with
+    min_position_value: 50
+    # Scale position with confidence
+    confidence_multiplier: 1.5
+
+  # Risk limits - Looser than normal
+  risk:
+    # Higher daily loss tolerance for aggressive trading
+    max_daily_loss_pct: 0.15
+    # Tighter stop loss to preserve capital on bad trades
+    stop_loss_pct: 0.05
+    # No take profit limits - let winners run
+    take_profit_pct: null
+    # Quick circuit breaker recovery
+    circuit_breaker_losses: 3
+    circuit_breaker_cooldown_minutes: 30
+
+  # Trade timing - FAST
+  timing:
+    # Check for signals every 30 seconds during market hours
+    check_interval_seconds: 30
+    # Minimum hold time (minutes) - quick scalps allowed
+    min_hold_minutes: 5
+    # Maximum hold time (hours) - don't become a bag holder
+    max_hold_hours: 8
+    # Trade in extended hours for more opportunities
+    extended_hours: true
+
+  # What to trade
+  assets:
+    # Stocks - focus on volatile movers
+    stocks:
+      enabled: true
+      # Minimum daily volatility to consider
+      min_daily_volatility_pct: 2.0
+      # Minimum average volume
+      min_avg_volume: 500000
+      # Price range (avoid pennies, avoid expensive)
+      min_price: 5
+      max_price: 500
+      # Focus on these volatile sectors
+      preferred_sectors:
+        - technology
+        - biotech
+        - cannabis
+        - ev
+        - meme_stocks
+
+    # Crypto - 24/7 trading opportunities
+    crypto:
+      enabled: true
+      # Trade top volatile cryptos
+      symbols:
+        - BTC/USD
+        - ETH/USD
+        - SOL/USD
+        - DOGE/USD
+        - SHIB/USD
+        - AVAX/USD
+        - MATIC/USD
+        - LINK/USD
+      # Minimum 24h volatility
+      min_volatility_pct: 3.0
+
+# Scanner settings - Find fast movers
+scanner:
+  enabled: true
+  # Scan frequency (minutes)
+  scan_interval_minutes: 15
+
+  # Volatility scanner weights - prioritize momentum
+  weights:
+    momentum: 0.35
+    volatility: 0.30
+    volume_spike: 0.25
+    sentiment: 0.10
+
+  # Thresholds for auto-trading
+  min_score_to_alert: 60
+  min_score_to_trade: 75
+
+  # What to look for
+  signals:
+    # Big price moves
+    price_spike_threshold_pct: 3.0
+    # Volume explosions
+    volume_spike_multiplier: 2.0
+    # RSI extremes for reversals
+    rsi_oversold: 25
+    rsi_overbought: 75
+    # Breakout detection
+    breakout_atr_multiplier: 1.5
+
+# Aggressive strategies optimized for quick profits
+strategies:
+  # Momentum chasing - ride the wave
+  momentum_rider:
+    enabled: true
+    description: "Chase stocks making big moves"
+    entry:
+      min_5min_move_pct: 1.5
+      min_volume_ratio: 1.5
+      macd_positive: true
+    exit:
+      profit_target_pct: 3.0
+      trailing_stop_pct: 1.5
+      max_hold_minutes: 120
+
+  # Volatility scalper - quick in/out
+  volatility_scalper:
+    enabled: true
+    description: "Quick scalps on volatile moves"
+    entry:
+      bollinger_breakout: true
+      volume_confirmation: true
+    exit:
+      profit_target_pct: 1.5
+      stop_loss_pct: 0.75
+      max_hold_minutes: 30
+
+  # Mean reversion sniper - buy the dip
+  dip_sniper:
+    enabled: true
+    description: "Buy sharp dips for quick bounces"
+    entry:
+      price_drop_pct: 3.0
+      rsi_below: 30
+      volume_spike: true
+    exit:
+      profit_target_pct: 2.0
+      stop_loss_pct: 2.0
+      max_hold_minutes: 60
+
+  # Breakout hunter - catch explosive moves
+  breakout_hunter:
+    enabled: true
+    description: "Catch breakouts from consolidation"
+    entry:
+      consolidation_days: 5
+      breakout_volume_ratio: 2.0
+      above_resistance: true
+    exit:
+      trailing_stop_pct: 2.0
+      max_hold_hours: 4
+
+# RL Agent configuration - Aggressive training
+rl_agent:
+  enabled: true
+
+  # Training parameters - fast learning
+  training:
+    # Fewer episodes needed with aggressive exploration
+    episodes: 200
+    # Larger batch for stability
+    batch_size: 64
+    # Higher learning rate for faster adaptation
+    learning_rate: 0.002
+    # Faster epsilon decay - exploit sooner
+    epsilon_decay: 0.98
+    epsilon_min: 0.05
+    # Discount factor - focus on immediate rewards
+    gamma: 0.90
+    # Smaller lookback - react to recent data
+    lookback_window: 15
+    # Update target network frequently
+    target_update_freq: 50
+
+  # Reward function - PROFIT FOCUSED
+  rewards:
+    # Massive bonus for profitable trades
+    profit_multiplier: 2.0
+    # Smaller penalty for losses (encourage risk-taking)
+    loss_multiplier: 0.5
+    # Penalty for holding too long
+    hold_penalty_per_hour: 0.01
+    # Bonus for quick profits
+    quick_profit_bonus: 0.5
+    # Bonus for catching big moves
+    big_move_bonus_threshold: 0.03
+    big_move_bonus: 1.0
+
+  # State features optimized for volatility
+  features:
+    - returns_1min
+    - returns_5min
+    - returns_15min
+    - volatility_5min
+    - volume_ratio
+    - rsi_fast
+    - macd_histogram
+    - bollinger_position
+    - momentum_score
+
+# Crypto-specific settings
+crypto:
+  # Use Alpaca crypto API
+  provider: alpaca
+  # 24/7 monitoring
+  monitor_24_7: true
+  # Crypto check interval (faster than stocks)
+  check_interval_seconds: 15
+  # Crypto-specific thresholds
+  thresholds:
+    min_move_pct: 1.0
+    volume_spike: 1.5
+
+# Logging for Taz
+logging:
+  level: INFO
+  file: logs/taz_trading.log
+  # Log all trades for analysis
+  log_all_trades: true
+  # Performance tracking
+  track_performance: true
+
+# Dashboard settings
+dashboard:
+  enabled: true
+  port: 8001  # Different port from main system
+  refresh_rate_seconds: 5

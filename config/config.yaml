@@ -1,0 +1,337 @@
+trading:
+  mode: paper
+  initial_capital: auto
+  max_position_size: 0.15
+  max_portfolio_risk: 0.02
+  min_profit_threshold: 0.001
+  max_daily_loss: 0.05
+  default_order_type: limit
+  limit_order_offset: 0.001
+  order_timeout: 300
+  day_trading:
+    enabled: true
+    max_positions: 20
+    max_trades_per_day: 1000
+    hold_time_min: 60
+    hold_time_max: 14400
+  long_term:
+    enabled: true
+    max_positions: 30
+    rebalance_frequency: weekly
+    min_hold_days: 30
+  stop_loss_pct: 0.02
+  max_drawdown: 0.15
+  max_positions: 20
+  max_trades_per_day: 1000
+portfolio:
+  diversification:
+    max_sector_allocation: 0.25
+    min_positions: 10
+    target_positions: 25
+  position_sizing:
+    method: kelly_criterion
+    kelly_fraction: 0.25
+  rebalancing:
+    threshold: 0.05
+    frequency: daily
+ml:
+  models:
+    price_prediction:
+      type: ensemble
+      lookback_period: 60
+      prediction_horizon: 5
+      retrain_frequency: weekly
+    sentiment_analysis:
+      model: finbert
+      confidence_threshold: 0.6
+    pattern_recognition:
+      enabled: true
+      patterns:
+      - head_shoulders
+      - double_top
+      - double_bottom
+      - triangles
+      - flags
+  feature_engineering:
+    technical_indicators:
+    - SMA_20
+    - SMA_50
+    - SMA_200
+    - EMA_12
+    - EMA_26
+    - RSI_14
+    - MACD
+    - BB_20
+    - ATR_14
+    - ADX_14
+    - OBV
+    - VWAP
+    fundamental_features:
+    - PE_ratio
+    - PB_ratio
+    - debt_to_equity
+    - ROE
+    - revenue_growth
+    - earnings_growth
+  training:
+    validation_split: 0.2
+    test_split: 0.1
+    epochs: 100
+    batch_size: 32
+    early_stopping_patience: 10
+backtesting:
+  enabled: true
+  start_date: '2020-01-01'
+  end_date: '2024-12-31'
+  initial_cash: 100000.0
+  commission: 0.001
+  slippage: 0.0005
+  strategies_to_test:
+  - mean_reversion
+  - momentum
+  - trend_following
+  - pairs_trading
+  - breakout
+  - ml_hybrid
+  optimization:
+    method: grid_search
+    metrics:
+    - sharpe_ratio
+    - total_return
+    - max_drawdown
+    - win_rate
+    primary_metric: sharpe_ratio
+data:
+  sources:
+    market_data:
+      primary: alpaca
+      backup: yfinance
+    news:
+    - newsapi
+    - alpaca_news
+    - finnhub
+    fundamental:
+    - alpha_vantage
+    - financial_modeling_prep
+  update_frequency:
+    real_time:
+    - price
+    - volume
+    minute:
+    - technical_indicators
+    hourly:
+    - news
+    - sentiment
+    daily:
+    - fundamentals
+  universe:
+    initial_stocks:
+    - SPY
+    - QQQ
+    - IWM
+    - DIA
+    - AAPL
+    - MSFT
+    - GOOGL
+    - AMZN
+    - TSLA
+    - META
+    - NVDA
+    - AMD
+    - NFLX
+    - CRM
+    - INTC
+    - MU
+    - QCOM
+    - AVGO
+    - TXN
+    - JPM
+    - BAC
+    - GS
+    - MS
+    - V
+    - MA
+    - JNJ
+    - UNH
+    - PFE
+    - ABBV
+    - MRK
+    - WMT
+    - COST
+    - HD
+    - NKE
+    - SBUX
+    - XOM
+    - CVX
+    - COP
+    - BA
+    - CAT
+    - GE
+    - HON
+    max_stocks: 500
+    filters:
+      min_price: 5.0
+      min_volume: 1000000
+      min_market_cap: 1000000000
+news:
+  sentiment_weight: 0.3
+  news_lookback_hours: 24
+  keywords:
+    positive:
+    - profit
+    - growth
+    - beat
+    - upgrade
+    - bullish
+    - acquire
+    negative:
+    - loss
+    - lawsuit
+    - downgrade
+    - bearish
+    - bankruptcy
+    - fraud
+  sources_priority:
+  - reuters
+  - bloomberg
+  - wsj
+  - cnbc
+risk:
+  stop_loss:
+    type: trailing
+    default_pct: 0.02
+    trailing_pct: 0.015
+  take_profit:
+    type: dynamic
+    targets:
+    - 0.02
+    - 0.05
+    - 0.1
+    position_reduction:
+    - 0.33
+    - 0.33
+    - 0.34
+  position_limits:
+    max_correlation: 0.7
+    max_leverage: 1.0
+  circuit_breakers:
+    daily_loss_limit: 0.05
+    consecutive_losses: 5
+    drawdown_limit: 0.15
+reporting:
+  daily_reports:
+    morning_preview: 08:30
+    evening_summary: '16:30'
+  metrics:
+  - total_return
+  - sharpe_ratio
+  - sortino_ratio
+  - max_drawdown
+  - win_rate
+  - profit_factor
+  - average_win
+  - average_loss
+  - total_trades
+  notifications:
+    email: true
+    slack: false
+    discord: false
+api_keys:
+  alpaca:
+    api_key: ${ALPACA_API_KEY}
+    secret_key: ${ALPACA_SECRET_KEY}
+    base_url: https://paper-api.alpaca.markets
+  news_api:
+    key: ${NEWS_API_KEY}
+  alpha_vantage:
+    key: ${ALPHA_VANTAGE_KEY}
+database:
+  type: sqlite
+  path: database/trading_bot.db
+  connection_pool_size: 10
+  tables:
+  - predictions
+  - trades
+  - portfolio_history
+  - performance_metrics
+  - news_sentiment
+  - backtests
+logging:
+  level: INFO
+  file: logs/trading_bot.log
+  max_size: 100MB
+  backup_count: 10
+  format: '{time:YYYY-MM-DD HH:mm:ss} | {level} | {name}:{function}:{line} | {message}'
+schedule:
+  premarket_analysis: 08:00
+  market_open_prep: 09:25
+  mid_day_review: '12:00'
+  end_of_day_analysis: '16:05'
+  after_hours_learning: '17:00'
+  model_retraining: Saturday 02:00
+  weekly_review: Sunday 10:00
+market_hours:
+  open_hour: 9
+  open_minute: 30
+  close_hour: 16
+  close_minute: 0
+  extended_start_hour: 8
+  extended_end_hour: 18
+learning:
+  direction_threshold: 0.1
+  flat_threshold: 0.3
+  weight_adjustment: 0.02
+  ema_alpha: 0.1
+  min_weight: 0.5
+  max_weight: 2.0
+  min_predictions_to_trade: 100
+  min_accuracy_to_trade: 0.55
+  min_confidence_to_trade: 0.55
+strategy_scoring:
+  trend_strong_bullish: 20
+  trend_mild_bullish: 10
+  trend_strong_bearish: -20
+  trend_mild_bearish: -10
+  rsi_oversold: 25
+  rsi_low: 10
+  rsi_overbought: -25
+  rsi_high: -10
+  macd_bullish_cross: 20
+  macd_bullish: 10
+  macd_bearish_cross: -20
+  macd_bearish: -10
+  volume_high: 15
+  volume_low: -15
+  volume_confirmation: 10
+service:
+  prediction_interval_minutes: 60
+  data_refresh_interval_seconds: 60
+  max_position_pct: 0.1
+  max_portfolio_risk_pct: 0.25
+  max_daily_loss_pct: 0.02
+  default_stop_loss_pct: 0.02
+  default_take_profit_pct: 0.05
+watchdog:
+  check_interval_seconds: 30
+  restart_delay_seconds: 10
+  max_restart_attempts: 3
+simple_trader:
+  calibration_days: 90
+  recalibrate_hours: 24
+  position_size_pct: 0.15
+  max_positions: 15
+  check_interval_seconds: 900
+  min_hold_hours: 4
+scanner:
+  enabled: true
+  daily_news_budget: 100
+  default_batch_size: 50
+  min_score_to_recommend: 50
+  min_score_to_auto_add: 60
+  max_auto_add_per_scan: 10
+  news_cache_hours: 6
+  weights:
+    sentiment: 0.30
+    technical: 0.30
+    volume: 0.20
+    momentum: 0.20

@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RL Trading System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            color: #f0f6fc;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(22, 27, 34, 0.95);
+            border-bottom: 1px solid #30363d;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .logo-icon {
+            font-size: 28px;
+        }
+
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-idle {
+            background: rgba(139, 148, 158, 0.2);
+            color: #8b949e;
+        }
+
+        .status-training {
+            background: rgba(56, 139, 253, 0.2);
+            color: #58a6ff;
+            animation: pulse 2s infinite;
+        }
+
+        .status-ready {
+            background: rgba(63, 185, 80, 0.2);
+            color: #3fb950;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: calc(100vh - 65px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: rgba(22, 27, 34, 0.8);
+            border-right: 1px solid #30363d;
+            padding: 20px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+            color: #c9d1d9;
+        }
+
+        .nav-item:hover {
+            background: rgba(56, 139, 253, 0.1);
+            color: #58a6ff;
+        }
+
+        .nav-item.active {
+            background: rgba(56, 139, 253, 0.2);
+            color: #58a6ff;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(22, 27, 34, 0.9);
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #f0f6fc;
+        }
+
+        /* Grid layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        /* Stats */
+        .stat-card {
+            background: rgba(22, 27, 34, 0.9);
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #58a6ff;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #8b949e;
+            margin-top: 4px;
+        }
+
+        .stat-value.positive { color: #3fb950; }
+        .stat-value.negative { color: #f85149; }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #c9d1d9;
+            margin-bottom: 6px;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 10px 14px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            color: #f0f6fc;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #238636, #2ea043);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2ea043, #3fb950);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #30363d;
+            color: #c9d1d9;
+        }
+
+        .btn-secondary:hover {
+            background: #3d444d;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #da3633, #f85149);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #f85149, #ff6b6b);
+        }
+
+        .btn-blue {
+            background: linear-gradient(135deg, #1f6feb, #388bfd);
+            color: white;
+        }
+
+        .btn-blue:hover {
+            background: linear-gradient(135deg, #388bfd, #58a6ff);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Tables */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th, .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .table th {
+            font-size: 12px;
+            font-weight: 600;
+            color: #8b949e;
+            text-transform: uppercase;
+        }
+
+        .table tr:hover {
+            background: rgba(56, 139, 253, 0.05);
+        }
+
+        /* Progress bar */
+        .progress-container {
+            background: #0d1117;
+            border-radius: 8px;
+            height: 24px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #238636, #3fb950);
+            border-radius: 8px;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Log output */
+        .log-output {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+
+        .log-line {
+            margin-bottom: 4px;
+        }
+
+        .log-time {
+            color: #8b949e;
+        }
+
+        .log-info { color: #58a6ff; }
+        .log-success { color: #3fb950; }
+        .log-warning { color: #d29922; }
+        .log-error { color: #f85149; }
+
+        /* Models list */
+        .model-card {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            transition: border-color 0.2s;
+        }
+
+        .model-card:hover {
+            border-color: #58a6ff;
+        }
+
+        .model-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .model-symbol {
+            font-size: 18px;
+            font-weight: 600;
+            color: #58a6ff;
+            background: rgba(56, 139, 253, 0.1);
+            padding: 8px 14px;
+            border-radius: 8px;
+        }
+
+        .model-details {
+            font-size: 13px;
+            color: #8b949e;
+        }
+
+        .model-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Hidden sections */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Episode chart placeholder */
+        .chart-container {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8b949e;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                display: none;
+            }
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #30363d;
+            border-top-color: #58a6ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+        }
+
+        .toast {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 12px 20px;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast-success { border-left: 3px solid #3fb950; }
+        .toast-error { border-left: 3px solid #f85149; }
+        .toast-info { border-left: 3px solid #58a6ff; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <span class="logo-icon">🤖</span>
+            <span>RL Trading System</span>
+        </div>
+        <div class="header-status">
+            <div id="systemStatus" class="status-badge status-idle">
+                <span>●</span> Idle
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Training</div>
+                <div class="nav-item active" onclick="showSection('train')">
+                    <span>🎯</span> Train Model
+                </div>
+                <div class="nav-item" onclick="showSection('progress')">
+                    <span>📊</span> Training Progress
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Models</div>
+                <div class="nav-item" onclick="showSection('models')">
+                    <span>🧠</span> Saved Models
+                </div>
+                <div class="nav-item" onclick="showSection('evaluate')">
+                    <span>📈</span> Evaluate
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Trading</div>
+                <div class="nav-item" onclick="showSection('shadow')">
+                    <span>👻</span> Shadow Trading
+                </div>
+                <div class="nav-item" onclick="showSection('compare')">
+                    <span>⚖️</span> Compare Strategies
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Settings</div>
+                <div class="nav-item" onclick="showSection('config')">
+                    <span>⚙️</span> Configuration
+                </div>
+            </div>
+        </aside>
+
+        <!-- Content -->
+        <main class="content">
+            <!-- Train Section -->
+            <section id="train" class="section active fade-in">
+                <h1 class="page-title">🎯 Train New Model</h1>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Training Configuration</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Stock Symbol</label>
+                            <input type="text" id="trainSymbol" class="form-input" placeholder="e.g., AAPL, TSLA, NVDA" value="AAPL">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Episodes</label>
+                            <input type="number" id="trainEpisodes" class="form-input" value="100" min="10" max="5000">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Historical Days</label>
+                            <input type="number" id="trainDays" class="form-input" value="365" min="30" max="730">
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                            <button id="startTrainBtn" class="btn btn-primary" onclick="startTraining()">
+                                <span>▶</span> Start Training
+                            </button>
+                            <button id="stopTrainBtn" class="btn btn-danger" onclick="stopTraining()" style="display: none;">
+                                <span>⏹</span> Stop Training
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Quick Train</span>
+                        </div>
+                        <p style="color: #8b949e; margin-bottom: 16px;">
+                            One-click training for popular stocks
+                        </p>
+
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <button class="btn btn-secondary" onclick="quickTrain('AAPL')">AAPL</button>
+                            <button class="btn btn-secondary" onclick="quickTrain('TSLA')">TSLA</button>
+                            <button class="btn btn-secondary" onclick="quickTrain('NVDA')">NVDA</button>
+                            <button class="btn btn-secondary" onclick="quickTrain('MSFT')">MSFT</button>
+                            <button class="btn btn-secondary" onclick="quickTrain('GOOGL')">GOOGL</button>
+                            <button class="btn btn-secondary" onclick="quickTrain('AMZN')">AMZN</button>
+                            <button class="btn btn-secondary" onclick="quickTrain('META')">META</button>
+                            <button class="btn btn-secondary" onclick="quickTrain('AMD')">AMD</button>
+                            <button class="btn btn-secondary" onclick="quickTrain('SPY')">SPY</button>
+                            <button class="btn btn-secondary" onclick="quickTrain('QQQ')">QQQ</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">How RL Training Works</span>
+                    </div>
+                    <div style="color: #8b949e; line-height: 1.8;">
+                        <p><strong style="color: #f0f6fc;">1. Data Fetching:</strong> Pulls historical price data from Alpaca API</p>
+                        <p><strong style="color: #f0f6fc;">2. Environment Setup:</strong> Creates a simulated trading environment with technical indicators</p>
+                        <p><strong style="color: #f0f6fc;">3. Episode Training:</strong> The agent replays history, learning from rewards (profit) and penalties (loss)</p>
+                        <p><strong style="color: #f0f6fc;">4. Model Saving:</strong> Best performing strategies are automatically saved</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Progress Section -->
+            <section id="progress" class="section fade-in">
+                <h1 class="page-title">📊 Training Progress</h1>
+
+                <div class="grid-4">
+                    <div class="stat-card">
+                        <div id="currentEpisode" class="stat-value">0</div>
+                        <div class="stat-label">Current Episode</div>
+                    </div>
+                    <div class="stat-card">
+                        <div id="bestReturn" class="stat-value positive">0%</div>
+                        <div class="stat-label">Best Return</div>
+                    </div>
+                    <div class="stat-card">
+                        <div id="avgReturn" class="stat-value">0%</div>
+                        <div class="stat-label">Avg Return</div>
+                    </div>
+                    <div class="stat-card">
+                        <div id="winRate" class="stat-value">0%</div>
+                        <div class="stat-label">Win Rate</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Progress</span>
+                        <span id="progressPct" style="color: #8b949e;">0%</span>
+                    </div>
+                    <div class="progress-container">
+                        <div id="progressBar" class="progress-bar" style="width: 0%;">0%</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Training Log</span>
+                        <button class="btn btn-secondary" onclick="clearLog()">Clear</button>
+                    </div>
+                    <div id="trainingLog" class="log-output">
+                        <div class="log-line"><span class="log-time">[--:--:--]</span> Waiting for training to start...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Models Section -->
+            <section id="models" class="section fade-in">
+                <h1 class="page-title">🧠 Saved Models</h1>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Available Models</span>
+                        <button class="btn btn-secondary" onclick="refreshModels()">
+                            <span>🔄</span> Refresh
+                        </button>
+                    </div>
+
+                    <div id="modelsList">
+                        <p style="color: #8b949e; text-align: center; padding: 40px;">
+                            Loading models...
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Evaluate Section -->
+            <section id="evaluate" class="section fade-in">
+                <h1 class="page-title">📈 Evaluate Model</h1>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Run Evaluation</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Select Model</label>
+                            <select id="evalSymbol" class="form-select">
+                                <option value="">Loading models...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Evaluation Days</label>
+                            <input type="number" id="evalDays" class="form-input" value="30" min="7" max="365">
+                        </div>
+
+                        <button class="btn btn-blue" onclick="runEvaluation()">
+                            <span>📊</span> Run Evaluation
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Results</span>
+                        </div>
+                        <div id="evalResults" style="color: #8b949e;">
+                            Run an evaluation to see results
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Shadow Trading Section -->
+            <section id="shadow" class="section fade-in">
+                <h1 class="page-title">👻 Shadow Trading</h1>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Shadow Mode</span>
+                    </div>
+                    <p style="color: #8b949e; margin-bottom: 16px;">
+                        Shadow trading runs the RL model in real-time, logging decisions without executing actual trades.
+                        This lets you validate the model before going live.
+                    </p>
+
+                    <div class="form-group">
+                        <label class="form-label">Symbols (comma separated)</label>
+                        <input type="text" id="shadowSymbols" class="form-input" placeholder="AAPL, TSLA, NVDA" value="AAPL">
+                    </div>
+
+                    <div style="display: flex; gap: 12px;">
+                        <button id="startShadowBtn" class="btn btn-primary" onclick="startShadow()">
+                            <span>▶</span> Start Shadow Trading
+                        </button>
+                        <button id="stopShadowBtn" class="btn btn-danger" onclick="stopShadow()" style="display: none;">
+                            <span>⏹</span> Stop
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Shadow Decisions Log</span>
+                    </div>
+                    <div id="shadowLog" class="log-output">
+                        <div class="log-line"><span class="log-time">[--:--:--]</span> Shadow trading not started</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Compare Section -->
+            <section id="compare" class="section fade-in">
+                <h1 class="page-title">⚖️ Compare Strategies</h1>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">RL Agent vs SimpleTrader</span>
+                    </div>
+
+                    <div class="grid-2" style="margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">Symbol</label>
+                            <select id="compareSymbol" class="form-select">
+                                <option value="">Loading models...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Days</label>
+                            <input type="number" id="compareDays" class="form-input" value="30">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-blue" onclick="runComparison()">
+                        <span>⚖️</span> Run Comparison
+                    </button>
+                </div>
+
+                <div id="compareResults" class="grid-2" style="display: none;">
+                    <div class="card" style="border-color: #58a6ff;">
+                        <div class="card-header">
+                            <span class="card-title" style="color: #58a6ff;">🤖 RL Agent</span>
+                        </div>
+                        <div id="rlResults">-</div>
+                    </div>
+                    <div class="card" style="border-color: #3fb950;">
+                        <div class="card-header">
+                            <span class="card-title" style="color: #3fb950;">📊 SimpleTrader</span>
+                        </div>
+                        <div id="simpleResults">-</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Config Section -->
+            <section id="config" class="section fade-in">
+                <h1 class="page-title">⚙️ Configuration</h1>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">RL Hyperparameters</span>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Learning Rate</label>
+                            <input type="number" class="form-input" value="0.001" step="0.0001">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Gamma (Discount Factor)</label>
+                            <input type="number" class="form-input" value="0.95" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Epsilon (Initial)</label>
+                            <input type="number" class="form-input" value="1.0" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Epsilon Decay</label>
+                            <input type="number" class="form-input" value="0.995" step="0.001">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Batch Size</label>
+                            <input type="number" class="form-input" value="32">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Memory Size</label>
+                            <input type="number" class="form-input" value="10000">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" style="margin-top: 16px;">
+                        <span>💾</span> Save Configuration
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Model Directory</span>
+                    </div>
+                    <code style="color: #8b949e; font-size: 13px;">
+                        C:\Users\joshu\OneDrive\AIBot\Improved\rl_system\models\
+                    </code>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // State
+        let currentSection = 'train';
+        let trainingActive = false;
+        let shadowActive = false;
+        let trainingInterval = null;
+
+        // API Base URL
+        const API_BASE = window.location.origin;
+
+        // Show section
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            document.getElementById(sectionId).classList.add('active');
+            event.target.closest('.nav-item').classList.add('active');
+            currentSection = sectionId;
+
+            // Load data for section
+            if (sectionId === 'models') refreshModels();
+            if (sectionId === 'evaluate') loadModelOptions('evalSymbol');
+            if (sectionId === 'compare') loadModelOptions('compareSymbol');
+        }
+
+        // Toast notification
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `<span>${type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ'}</span> ${message}`;
+            container.appendChild(toast);
+
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        // Format time
+        function formatTime() {
+            return new Date().toLocaleTimeString('en-US', { hour12: false });
+        }
+
+        // Add log entry
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('trainingLog');
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            line.innerHTML = `<span class="log-time">[${formatTime()}]</span> <span class="log-${type}">${message}</span>`;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('trainingLog').innerHTML = '';
+        }
+
+        // Training functions
+        async function startTraining() {
+            const symbol = document.getElementById('trainSymbol').value.toUpperCase();
+            const episodes = document.getElementById('trainEpisodes').value;
+            const days = document.getElementById('trainDays').value;
+
+            if (!symbol) {
+                showToast('Please enter a symbol', 'error');
+                return;
+            }
+
+            try {
+                document.getElementById('startTrainBtn').style.display = 'none';
+                document.getElementById('stopTrainBtn').style.display = 'inline-flex';
+                updateStatus('training');
+                trainingActive = true;
+
+                addLog(`Starting training for ${symbol} - ${episodes} episodes, ${days} days of data`, 'info');
+
+                const response = await fetch(`${API_BASE}/api/rl/train`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symbol, episodes: parseInt(episodes), days: parseInt(days) })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    addLog(`Training started! Task ID: ${data.task_id}`, 'success');
+                    showSection('progress');
+                    startProgressPolling(data.task_id);
+                } else {
+                    addLog(`Failed to start: ${data.error}`, 'error');
+                    resetTrainingUI();
+                }
+            } catch (e) {
+                addLog(`Error: ${e.message}`, 'error');
+                showToast('Failed to start training', 'error');
+                resetTrainingUI();
+            }
+        }
+
+        async function stopTraining() {
+            try {
+                await fetch(`${API_BASE}/api/rl/stop`, { method: 'POST' });
+                addLog('Training stopped by user', 'warning');
+                resetTrainingUI();
+            } catch (e) {
+                showToast('Failed to stop training', 'error');
+            }
+        }
+
+        function resetTrainingUI() {
+            document.getElementById('startTrainBtn').style.display = 'inline-flex';
+            document.getElementById('stopTrainBtn').style.display = 'none';
+            updateStatus('idle');
+            trainingActive = false;
+            if (trainingInterval) clearInterval(trainingInterval);
+        }
+
+        function quickTrain(symbol) {
+            document.getElementById('trainSymbol').value = symbol;
+            startTraining();
+        }
+
+        // Progress polling
+        function startProgressPolling(taskId) {
+            if (trainingInterval) clearInterval(trainingInterval);
+
+            trainingInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`${API_BASE}/api/rl/progress/${taskId}`);
+                    const data = await response.json();
+
+                    if (data.status === 'running') {
+                        updateProgress(data);
+                    } else if (data.status === 'completed') {
+                        addLog(`Training completed! Best return: ${data.best_return}%`, 'success');
+                        showToast('Training completed!', 'success');
+                        updateProgress(data);
+                        resetTrainingUI();
+                    } else if (data.status === 'failed') {
+                        addLog(`Training failed: ${data.error}`, 'error');
+                        resetTrainingUI();
+                    }
+                } catch (e) {
+                    console.error('Progress poll error:', e);
+                }
+            }, 3000);
+        }
+
+        function updateProgress(data) {
+            const pct = Math.round((data.episode / data.total_episodes) * 100);
+
+            document.getElementById('currentEpisode').textContent = `${data.episode}/${data.total_episodes}`;
+            document.getElementById('bestReturn').textContent = `${(data.best_return || 0).toFixed(1)}%`;
+            document.getElementById('avgReturn').textContent = `${(data.avg_return || 0).toFixed(1)}%`;
+            document.getElementById('winRate').textContent = `${(data.win_rate || 0).toFixed(1)}%`;
+            document.getElementById('progressBar').style.width = `${pct}%`;
+            document.getElementById('progressBar').textContent = `${pct}%`;
+            document.getElementById('progressPct').textContent = `${pct}%`;
+
+            if (data.latest_log) {
+                addLog(data.latest_log, 'info');
+            }
+        }
+
+        // Status update
+        function updateStatus(status) {
+            const el = document.getElementById('systemStatus');
+            el.className = `status-badge status-${status}`;
+            el.innerHTML = `<span>●</span> ${status.charAt(0).toUpperCase() + status.slice(1)}`;
+        }
+
+        // Models
+        async function refreshModels() {
+            try {
+                const response = await fetch(`${API_BASE}/api/rl/models`);
+                const data = await response.json();
+
+                const container = document.getElementById('modelsList');
+
+                if (!data.models || data.models.length === 0) {
+                    container.innerHTML = '<p style="color: #8b949e; text-align: center; padding: 40px;">No models found. Train a model first!</p>';
+                    return;
+                }
+
+                container.innerHTML = data.models.map(model => `
+                    <div class="model-card">
+                        <div class="model-info">
+                            <span class="model-symbol">${model.symbol}</span>
+                            <div class="model-details">
+                                <div>Episodes: ${model.train_steps || 'N/A'}</div>
+                                <div>Last trained: ${model.last_modified || 'Unknown'}</div>
+                            </div>
+                        </div>
+                        <div class="model-actions">
+                            <button class="btn btn-secondary" onclick="evaluateModel('${model.symbol}')">Evaluate</button>
+                            <button class="btn btn-danger" onclick="deleteModel('${model.symbol}')">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                document.getElementById('modelsList').innerHTML = '<p style="color: #f85149; text-align: center; padding: 40px;">Failed to load models</p>';
+            }
+        }
+
+        async function loadModelOptions(selectId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/rl/models`);
+                const data = await response.json();
+                const select = document.getElementById(selectId);
+
+                if (!data.models || data.models.length === 0) {
+                    select.innerHTML = '<option value="">No models available</option>';
+                    return;
+                }
+
+                select.innerHTML = data.models.map(m =>
+                    `<option value="${m.symbol}">${m.symbol}</option>`
+                ).join('');
+            } catch (e) {
+                console.error('Failed to load model options:', e);
+            }
+        }
+
+        async function deleteModel(symbol) {
+            if (!confirm(`Delete model for ${symbol}?`)) return;
+
+            try {
+                await fetch(`${API_BASE}/api/rl/models/${symbol}`, { method: 'DELETE' });
+                showToast(`Deleted ${symbol} model`, 'success');
+                refreshModels();
+            } catch (e) {
+                showToast('Failed to delete model', 'error');
+            }
+        }
+
+        // Evaluation
+        async function runEvaluation() {
+            const symbol = document.getElementById('evalSymbol').value;
+            const days = document.getElementById('evalDays').value;
+
+            if (!symbol) {
+                showToast('Please select a model', 'error');
+                return;
+            }
+
+            document.getElementById('evalResults').innerHTML = '<div class="spinner"></div> Running evaluation...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/rl/evaluate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symbol, days: parseInt(days) })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('evalResults').innerHTML = `
+                        <div style="display: grid; gap: 12px;">
+                            <div><strong>Total Return:</strong> <span class="${data.total_return >= 0 ? 'positive' : 'negative'}">${data.total_return.toFixed(2)}%</span></div>
+                            <div><strong>Sharpe Ratio:</strong> ${data.sharpe_ratio?.toFixed(2) || 'N/A'}</div>
+                            <div><strong>Max Drawdown:</strong> ${data.max_drawdown?.toFixed(2) || 'N/A'}%</div>
+                            <div><strong>Win Rate:</strong> ${data.win_rate?.toFixed(1) || 'N/A'}%</div>
+                            <div><strong>Total Trades:</strong> ${data.total_trades || 0}</div>
+                            <div><strong>Buy & Hold Return:</strong> ${data.buy_hold_return?.toFixed(2) || 'N/A'}%</div>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('evalResults').innerHTML = `<span style="color: #f85149;">Error: ${data.error}</span>`;
+                }
+            } catch (e) {
+                document.getElementById('evalResults').innerHTML = `<span style="color: #f85149;">Failed to run evaluation</span>`;
+            }
+        }
+
+        function evaluateModel(symbol) {
+            showSection('evaluate');
+            document.getElementById('evalSymbol').value = symbol;
+            runEvaluation();
+        }
+
+        // Shadow trading
+        async function startShadow() {
+            const symbols = document.getElementById('shadowSymbols').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/rl/shadow/start`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symbols: symbols.split(',').map(s => s.trim()) })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('startShadowBtn').style.display = 'none';
+                    document.getElementById('stopShadowBtn').style.display = 'inline-flex';
+                    shadowActive = true;
+                    showToast('Shadow trading started', 'success');
+                    addShadowLog('Shadow trading started for: ' + symbols);
+                } else {
+                    showToast('Failed to start: ' + data.error, 'error');
+                }
+            } catch (e) {
+                showToast('Failed to start shadow trading', 'error');
+            }
+        }
+
+        async function stopShadow() {
+            try {
+                await fetch(`${API_BASE}/api/rl/shadow/stop`, { method: 'POST' });
+                document.getElementById('startShadowBtn').style.display = 'inline-flex';
+                document.getElementById('stopShadowBtn').style.display = 'none';
+                shadowActive = false;
+                showToast('Shadow trading stopped', 'info');
+            } catch (e) {
+                showToast('Failed to stop', 'error');
+            }
+        }
+
+        function addShadowLog(message) {
+            const log = document.getElementById('shadowLog');
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            line.innerHTML = `<span class="log-time">[${formatTime()}]</span> ${message}`;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Comparison
+        async function runComparison() {
+            const symbol = document.getElementById('compareSymbol').value;
+            const days = document.getElementById('compareDays').value;
+
+            if (!symbol) {
+                showToast('Please select a symbol', 'error');
+                return;
+            }
+
+            document.getElementById('compareResults').style.display = 'grid';
+            document.getElementById('rlResults').innerHTML = '<div class="spinner"></div> Loading...';
+            document.getElementById('simpleResults').innerHTML = '<div class="spinner"></div> Loading...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/rl/compare`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symbol, days: parseInt(days) })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('rlResults').innerHTML = `
+                        <div><strong>Return:</strong> ${data.rl.return_pct?.toFixed(2)}%</div>
+                        <div><strong>Trades:</strong> ${data.rl.trades}</div>
+                        <div><strong>Win Rate:</strong> ${data.rl.win_rate?.toFixed(1)}%</div>
+                        <div><strong>Sharpe:</strong> ${data.rl.sharpe?.toFixed(2)}</div>
+                    `;
+                    document.getElementById('simpleResults').innerHTML = `
+                        <div><strong>Return:</strong> ${data.simple.return_pct?.toFixed(2)}%</div>
+                        <div><strong>Trades:</strong> ${data.simple.trades}</div>
+                        <div><strong>Win Rate:</strong> ${data.simple.win_rate?.toFixed(1)}%</div>
+                        <div><strong>Strategy:</strong> ${data.simple.strategy}</div>
+                    `;
+                } else {
+                    document.getElementById('rlResults').innerHTML = `Error: ${data.error}`;
+                    document.getElementById('simpleResults').innerHTML = '-';
+                }
+            } catch (e) {
+                document.getElementById('rlResults').innerHTML = 'Failed to load';
+                document.getElementById('simpleResults').innerHTML = 'Failed to load';
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshModels();
+        });
+    </script>
+</body>
+</html>
