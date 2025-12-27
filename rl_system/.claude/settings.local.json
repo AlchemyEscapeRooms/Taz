@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(python rl_trader.py train:*)"
-    ]
-  }
-}
