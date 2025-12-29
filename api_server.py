@@ -2719,9 +2719,9 @@ def get_taz_trader() -> Optional[TazTrader]:
         taz_trader = TazTrader(
             initial_capital=1000,
             paper=True,  # Default to paper trading
-            max_position_pct=0.40,
+            max_position_pct=0.15,  # REDUCED from 40% to 15%
             max_positions=3,
-            stop_loss_pct=0.05,
+            stop_loss_pct=0.02,  # TIGHTENED from 5% to 2%
             take_profit_pct=0.03,
             trade_crypto=True,
             trade_stocks=False,  # Crypto-only to avoid PDT

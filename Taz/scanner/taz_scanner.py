@@ -424,17 +424,22 @@ class TazScanner:
         signal = 'WATCH'
         strategy = 'momentum_rider'
 
-        # BUY signals
-        if rsi < 30 and volume_ratio > 1.5:
+        # BUY signals - NEVER buy when overbought (RSI > 70)
+        if rsi > 70:
+            signal = 'WATCH'  # Overbought - don't chase
+            strategy = 'overbought_avoid'
+        elif rsi < 30 and volume_ratio > 1.5 and macd_signal not in ['bearish', 'bearish_cross']:
+            # Dip sniper - only if not in confirmed downtrend
             signal = 'BUY'
             strategy = 'dip_sniper'
-        elif macd_signal == 'bullish_cross' and volume_ratio > 1.5:
+        elif macd_signal == 'bullish_cross' and volume_ratio > 1.5 and rsi < 65:
             signal = 'BUY'
             strategy = 'momentum_rider'
-        elif bb_position < 0.1 and rsi < 40:
+        elif bb_position < 0.1 and rsi < 40 and macd_signal != 'bearish_cross':
             signal = 'BUY'
             strategy = 'volatility_scalper'
-        elif momentum > 3 and volume_ratio > 2:
+        elif momentum > 3 and volume_ratio > 2 and rsi < 65 and rsi > 35:
+            # Breakout hunter - only if not overbought AND not oversold (avoid falling knives)
             signal = 'BUY'
             strategy = 'breakout_hunter'
 

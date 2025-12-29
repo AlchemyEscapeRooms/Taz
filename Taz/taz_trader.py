@@ -90,9 +90,9 @@ class TazTrader:
         self,
         initial_capital: float = 1000,
         paper: bool = True,
-        max_position_pct: float = 0.40,
+        max_position_pct: float = 0.15,  # REDUCED from 40% to 15% for safety
         max_positions: int = 3,
-        stop_loss_pct: float = 0.05,
+        stop_loss_pct: float = 0.02,  # TIGHTENED from 5% to 2%
         take_profit_pct: float = 0.03,
         check_interval: int = 30,  # Seconds
         use_rl: bool = True,
@@ -654,7 +654,7 @@ def main():
     parser.add_argument('--no-crypto', action='store_true', help='Disable crypto trading')
     parser.add_argument('--stocks', action='store_true', help='Enable stock trading (disabled by default to avoid PDT)')
     parser.add_argument('--no-rl', action='store_true', help='Disable RL agent')
-    parser.add_argument('--position-size', type=float, default=0.40, help='Max position %')
+    parser.add_argument('--position-size', type=float, default=0.15, help='Max position % (default: 15%)')
     parser.add_argument('--max-positions', type=int, default=3, help='Max concurrent positions')
 
     args = parser.parse_args()

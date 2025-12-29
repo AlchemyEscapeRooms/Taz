@@ -52,9 +52,9 @@ class TazRLConfig:
     initial_balance: float = 1000  # Small account focus
     transaction_cost: float = 0.001
 
-    # Aggressive position sizing
-    max_position_pct: float = 0.5  # Up to 50% in one trade
-    min_position_pct: float = 0.2  # At least 20% when entering
+    # Conservative position sizing for safety
+    max_position_pct: float = 0.15  # REDUCED from 50% to 15%
+    min_position_pct: float = 0.10  # At least 10% when entering
 
     # Agent - faster learning
     state_size: int = 0
@@ -73,13 +73,13 @@ class TazRLConfig:
     # Network
     hidden_layers: List[int] = None
 
-    # Reward tuning
-    profit_multiplier: float = 2.0  # Boost profit rewards
-    loss_multiplier: float = 0.5  # Reduce loss penalties
-    hold_penalty: float = 0.02  # Penalize doing nothing
-    quick_profit_bonus: float = 0.5
-    big_move_threshold: float = 0.03  # 3% = big move
-    big_move_bonus: float = 1.0
+    # Reward tuning - BALANCED to learn from losses
+    profit_multiplier: float = 1.5  # Moderate profit rewards
+    loss_multiplier: float = 2.0  # INCREASED - losses should hurt more to learn
+    hold_penalty: float = 0.01  # Small penalty for doing nothing
+    quick_profit_bonus: float = 0.3
+    big_move_threshold: float = 0.02  # 2% = big move
+    big_move_bonus: float = 0.5
 
     def __post_init__(self):
         if self.hidden_layers is None:

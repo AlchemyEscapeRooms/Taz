@@ -310,9 +310,9 @@ Risk Warning:
     # Trading parameters
     parser.add_argument('--capital', type=float, default=1000, help='Initial capital (default: 1000)')
     parser.add_argument('--live', action='store_true', help='Live trading (default: paper)')
-    parser.add_argument('--position-size', type=float, default=0.40, help='Max position size (default: 0.40)')
+    parser.add_argument('--position-size', type=float, default=0.15, help='Max position size (default: 0.15 = 15%)')
     parser.add_argument('--max-positions', type=int, default=3, help='Max positions (default: 3)')
-    parser.add_argument('--stop-loss', type=float, default=0.05, help='Stop loss % (default: 0.05)')
+    parser.add_argument('--stop-loss', type=float, default=0.02, help='Stop loss % (default: 0.02 = 2%)')
     parser.add_argument('--take-profit', type=float, default=0.03, help='Take profit % (default: 0.03)')
     parser.add_argument('--interval', type=int, default=30, help='Check interval seconds (default: 30)')
     parser.add_argument('--no-crypto', action='store_true', help='Disable crypto trading')
