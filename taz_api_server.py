@@ -203,22 +203,30 @@ async def taz_stats():
 
 @app.get("/api/taz/scanner")
 async def taz_scanner_results():
-    """Get latest scanner results."""
+    """Get latest scanner results. Auto-scans crypto if empty."""
     try:
         scanner = get_scanner()
         results_file = Path("Taz/data/taz_scanner_results.json")
 
+        # Check if we need to scan
+        need_scan = True
         if results_file.exists():
             with open(results_file, 'r') as f:
                 data = json.load(f)
-            return data
-        else:
-            return {
-                "scan_time": None,
-                "total_opportunities": 0,
-                "buy_signals": 0,
-                "opportunities": []
-            }
+            # If we have recent results, use them
+            if data.get("opportunities") and len(data["opportunities"]) > 0:
+                need_scan = False
+
+        if need_scan:
+            # Run crypto scan
+            opportunities = scanner.scan_crypto()
+            scanner.opportunities = opportunities
+            scanner._save_results()
+
+            with open(results_file, 'r') as f:
+                data = json.load(f)
+
+        return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
