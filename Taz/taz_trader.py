@@ -96,7 +96,8 @@ class TazTrader:
         take_profit_pct: float = 0.03,
         check_interval: int = 30,  # Seconds
         use_rl: bool = True,
-        trade_crypto: bool = True
+        trade_crypto: bool = True,
+        trade_stocks: bool = False  # Disabled by default to avoid PDT
     ):
         """
         Initialize Taz Trader.
@@ -111,6 +112,7 @@ class TazTrader:
             check_interval: Seconds between checks
             use_rl: Use RL agent for decisions
             trade_crypto: Enable crypto trading
+            trade_stocks: Enable stock trading (disabled by default to avoid PDT)
         """
         self.initial_capital = initial_capital
         self.paper = paper
@@ -121,6 +123,7 @@ class TazTrader:
         self.check_interval = check_interval
         self.use_rl = use_rl
         self.trade_crypto = trade_crypto
+        self.trade_stocks = trade_stocks
 
         # Alpaca clients
         self.trading_client = TradingClient(API_KEY, API_SECRET, paper=paper)
@@ -160,6 +163,7 @@ class TazTrader:
   Max Position: {max_position_pct*100:.0f}%
   Stop Loss: {stop_loss_pct*100:.0f}% | Take Profit: {take_profit_pct*100:.0f}%
   Crypto: {'Enabled' if trade_crypto else 'Disabled'}
+  Stocks: {'Enabled' if trade_stocks else 'Disabled (No PDT)'}
   RL Agent: {'Enabled' if use_rl else 'Disabled'}
 ================================================================
         """)
@@ -414,8 +418,13 @@ class TazTrader:
             print(f"[TAZ] Max positions reached, skipping scan")
             return
 
-        # Scan stocks
-        opportunities = self.scanner.scan_stocks()
+        # Scan for opportunities
+        opportunities = []
+
+        # Scan stocks if enabled
+        if self.trade_stocks:
+            stock_opps = self.scanner.scan_stocks()
+            opportunities.extend(stock_opps)
 
         # Scan crypto if enabled
         if self.trade_crypto:
@@ -502,15 +511,15 @@ class TazTrader:
                 self.check_positions()
 
                 # Check if we should scan
-                can_trade_stocks = self.is_trading_hours('stock')
-                can_trade_crypto = self.trade_crypto  # Always true if enabled
+                can_trade_stocks = self.trade_stocks and self.is_trading_hours('stock')
+                can_trade_crypto = self.trade_crypto  # Crypto trades 24/7
 
                 if can_trade_stocks or can_trade_crypto:
                     self.scan_for_opportunities()
                 else:
                     # Print waiting message occasionally
                     if datetime.now().second < self.check_interval:
-                        print(f"[TAZ] Market closed - crypto only mode")
+                        print(f"[TAZ] Waiting for trading hours...")
 
                 # Wait
                 time.sleep(self.check_interval)
@@ -630,7 +639,8 @@ class TazTrader:
             },
             'scanner': self.scanner.get_status() if hasattr(self.scanner, 'get_status') else {},
             'market_open': self.is_trading_hours('stock'),
-            'crypto_enabled': self.trade_crypto
+            'crypto_enabled': self.trade_crypto,
+            'stocks_enabled': self.trade_stocks
         }
 
 
@@ -642,6 +652,7 @@ def main():
     parser.add_argument('--capital', type=float, default=1000, help='Initial capital')
     parser.add_argument('--live', action='store_true', help='Live trading (default: paper)')
     parser.add_argument('--no-crypto', action='store_true', help='Disable crypto trading')
+    parser.add_argument('--stocks', action='store_true', help='Enable stock trading (disabled by default to avoid PDT)')
     parser.add_argument('--no-rl', action='store_true', help='Disable RL agent')
     parser.add_argument('--position-size', type=float, default=0.40, help='Max position %')
     parser.add_argument('--max-positions', type=int, default=3, help='Max concurrent positions')
@@ -654,6 +665,7 @@ def main():
         max_position_pct=args.position_size,
         max_positions=args.max_positions,
         trade_crypto=not args.no_crypto,
+        trade_stocks=args.stocks,
         use_rl=not args.no_rl
     )
 

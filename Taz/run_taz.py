@@ -50,6 +50,7 @@ def run_trader(args):
         take_profit_pct=args.take_profit,
         check_interval=args.interval,
         trade_crypto=not args.no_crypto,
+        trade_stocks=args.stocks,
         use_rl=not args.no_rl
     )
 
@@ -315,6 +316,7 @@ Risk Warning:
     parser.add_argument('--take-profit', type=float, default=0.03, help='Take profit % (default: 0.03)')
     parser.add_argument('--interval', type=int, default=30, help='Check interval seconds (default: 30)')
     parser.add_argument('--no-crypto', action='store_true', help='Disable crypto trading')
+    parser.add_argument('--stocks', action='store_true', help='Enable stock trading (disabled by default to avoid PDT)')
     parser.add_argument('--no-rl', action='store_true', help='Disable RL agent')
 
     # Scanner parameters
